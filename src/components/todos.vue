@@ -1,51 +1,55 @@
 <template>
   <div class="hello">
- <Header/>
+    <Header />
+    <AddTodo v-on:add-todo="addTodo" />
 
     <div v-bind:key="todo.id" v-for="todo in todos">
-        <TodoItem v-bind:todo="todo" v-on:del-todo="deleteTodo" />
+      <TodoItem v-bind:todo="todo" v-on:del-todo="deleteTodo" />
       <!-- {{ todo.title }} -->
     </div>
   </div>
 </template>
 
 <script>
-
-import TodoItem from './todoItem.vue';
-import Header from './layout/Header.vue';
+import TodoItem from "./todoItem.vue";
+import Header from "./layout/Header.vue";
+import AddTodo from "./AddTodo.vue";
+import axios from "axios";
 
 export default {
   name: "Todos",
-  components:{
-      TodoItem,
-      Header
+  components: {
+    TodoItem,
+    Header,
+    AddTodo
   },
 
   data() {
     return {
-      todos: [
-        {
-          id: 1,
-          title: "Todo One",
-          completed: false
-        },
-        {
-          id: 2,
-          title: "Todo two",
-          completed: true
-        },
-        {
-          id: 3,
-          title: "Todo three",
-          completed: false
-        }
-      ]
+      todos: []
     };
   },
-  methods:{
-      deleteTodo(id){
-          this.todos = this.todos.filter(item=>item.id!==id);
-      }
+  methods: {
+    deleteTodo(id) {
+      this.todos = this.todos.filter(item => item.id !== id);
+    },
+    addTodo(newTodo) {
+      const { title, completed } = newTodo;
+      axios
+        .post("https://jsonplaceholder.typicode.com/todos", {
+          title,
+          completed
+        })
+        .then(res => (this.todos = [...this.todos, res.data]))
+        .catch(err => console.log(err));
+      this.todos = [...this.todos, newTodo];
+    }
+  },
+  created() {
+    axios
+      .get("https://jsonplaceholder.typicode.com/todos?_limit=5")
+      .then(res => (this.todos = res.data))
+      .catch(err => console.log(err));
   }
 };
 </script>
